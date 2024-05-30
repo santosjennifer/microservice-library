@@ -1,0 +1,39 @@
+spring:
+   application:
+      name: library-api
+   datasource:
+      url: jdbc:postgresql://localhost:5432/library
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver
+   jpa: 
+      hibernate:
+         ddl-auto: update
+   mail:
+      protocol: smtp
+      host: smtp.gmail.com
+      port: 587
+      username: ${MAIL_USERNAME}
+      password: ${MAIL_PASSWORD}
+      properties:
+         mail:
+            smtp:
+               auth: true
+               starttls:
+                  enable: true
+                  
+lateloans:
+   message: Atenção! Você tem um empréstimo atrasado. Favor devolver o livro o mais rápido possível.
+defaultRemetent: mail@library-api.com
+
+#Adicionar todos os endpoints do actuator
+management:
+   endpoints:
+      web:
+         exposure:
+            include: "*"
+
+#Criando arquivo de logs - actuator gera/monitora
+logging:
+   file:
+      name: appfile.log
