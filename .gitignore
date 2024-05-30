@@ -22,3 +22,6 @@ blog/bin/
 .settings
 .springBeans
 .sts4-cache
+
+#Logs
+appfile.log
