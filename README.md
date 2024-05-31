@@ -1,4 +1,5 @@
 ![Last Commit](https://img.shields.io/github/last-commit/santosjennifer/microservice-library)
+[![Continuous Integration with Github](https://github.com/santosjennifer/microservice-library/actions/workflows/ci-maven.yml/badge.svg)](https://github.com/santosjennifer/microservice-library/actions/workflows/ci-maven.yml)
 
 ## Library API
 Projeto para cadastro e controle de aluguel de livros. 
