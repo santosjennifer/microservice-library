@@ -1,15 +1,13 @@
 package com.libraryapi.api.resource;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import java.util.Optional;
 import java.util.Arrays;
+import java.util.Optional;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -18,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,10 +31,6 @@ import com.libraryapi.exception.BusinessException;
 import com.libraryapi.model.entity.Book;
 import com.libraryapi.service.BookService;
 import com.libraryapi.service.LoanService;
-
-import static org.hamcrest.Matchers.hasSize;
-
-import static org.mockito.ArgumentMatchers.anyLong;
 
 @ActiveProfiles("test")
 @WebMvcTest(controllers = BookController.class)
@@ -56,7 +52,7 @@ public class BookControllerTest {
 	@DisplayName("Deve criar um livro com sucesso.")
 	public void createBookeTest() throws Exception {
 		BookDto dto = createNewBook();
-		Book saveBook = Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
+		Book saveBook = Book.builder().id(10l).author("Suzanne Collins").title("Catching Fire").isbn("001").build();
 		
 		BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(saveBook);
 			
@@ -189,7 +185,7 @@ public class BookControllerTest {
     	BDDMockito.given(service.getById(anyLong()))
     		.willReturn(Optional.of(updatingBook));
     	
-    	Book updateBook = Book.builder().id(id).author("Artur").title("As aventuras").isbn("321").build();
+    	Book updateBook = Book.builder().id(id).author("Suzanne Collins").title("Catching Fire").isbn("321").build();
     	BDDMockito.given(service.update(updatingBook)).willReturn(updateBook);
     	
     	MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -248,14 +244,14 @@ public class BookControllerTest {
         mvc
             .perform(request)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("content", Matchers.hasSize(1)))
-            .andExpect(jsonPath("totalElements").value(1))
-            .andExpect(jsonPath("pageable.pageSize").value(100))
-            .andExpect(jsonPath("pageable.pageNumber").value(0));
+            .andExpect(jsonPath("$.[0].id").value("1"))
+            .andExpect(jsonPath("$.[0].title").value("Catching Fire"))
+            .andExpect(jsonPath("$.[0].author").value("Suzanne Collins"))
+            .andExpect(jsonPath("$.[0].isbn").value("001"));
     }
     
     private BookDto createNewBook() {
-        return BookDto.builder().author("Artur").title("As aventuras").isbn("001").build();
+        return BookDto.builder().author("Suzanne Collins").title("Catching Fire").isbn("001").build();
     }
 	
 }

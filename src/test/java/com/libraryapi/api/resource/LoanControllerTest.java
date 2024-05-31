@@ -1,7 +1,6 @@
 package com.libraryapi.api.resource;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,7 +60,7 @@ public class LoanControllerTest {
         String json = new ObjectMapper().writeValueAsString(dto);
 
         Book book = Book.builder().id(1l).isbn("123").build();
-        BDDMockito.given( bookService.getBookByIsbn("123") ).willReturn(Optional.of(book));
+        BDDMockito.given( bookService.getBookByIsbn("123")).willReturn(Optional.of(book));
 
         Loan loan = Loan.builder().id(1l).customer("Fulano").book(book).loanDate(LocalDate.now()).build();
         BDDMockito.given(loanService.save(Mockito.any(Loan.class))).willReturn(loan);
@@ -73,13 +72,15 @@ public class LoanControllerTest {
 
         mvc.perform(request)
                 .andExpect(status().isCreated())
-                .andExpect(content().string("1"));
+                .andExpect(jsonPath("loan").value("1"))
+                .andExpect(jsonPath("customer").value("Fulano"))
+                .andExpect(jsonPath("returned").value(false));
     }
 
     @Test
     @DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro inexistente.")
     public void invalidIsbnCreateLoanTest() throws Exception{
-        LoanDto dto = LoanDto.builder().isbn("123").customer("Fulano").build();
+        LoanDto dto = LoanDto.builder().isbn("123").customer("Fulano").email("customer@mail.com").build();
         String json = new ObjectMapper().writeValueAsString(dto);
 
         BDDMockito.given(bookService.getBookByIsbn("123")).willReturn(Optional.empty());
@@ -92,13 +93,13 @@ public class LoanControllerTest {
         mvc.perform(request)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors", Matchers.hasSize(1)))
-                .andExpect(jsonPath("errors[0]").value("Livro não encontrado com o ISBN informado."));
+                .andExpect(jsonPath("errors[0]").value("Livro não encontrado para o ISBN informado."));
     }
 
     @Test
     @DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro emprestado.")
     public void loanedBookErrorOnCreateLoanTest() throws Exception{
-        LoanDto dto = LoanDto.builder().isbn("123").customer("Fulano").build();
+        LoanDto dto = LoanDto.builder().isbn("123").customer("Fulano").email("customer@mail.com").build();
         String json = new ObjectMapper().writeValueAsString(dto);
 
         Book book = Book.builder().id(1l).isbn("123").build();
@@ -162,9 +163,10 @@ public class LoanControllerTest {
         loan.setId(id);
         Book book = Book.builder().id(1l).isbn("321").build();
         loan.setBook(book);
+        loan.setReturned(false);
 
-        BDDMockito.given( loanService.find( Mockito.any(LoanFilterDto.class), Mockito.any(Pageable.class)) )
-                .willReturn( new PageImpl<Loan>( Arrays.asList(loan), PageRequest.of(0,10), 1 ) );
+        BDDMockito.given(loanService.find(Mockito.any(LoanFilterDto.class), Mockito.any(Pageable.class)))
+                .willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0,10), 1));
 
         String queryString = String.format("?isbn=%s&customer=%s&page=0&size=10",
                 book.getIsbn(), loan.getCustomer());
@@ -176,10 +178,10 @@ public class LoanControllerTest {
         mvc
                 .perform(request)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("content", Matchers.hasSize(1)))
-                .andExpect(jsonPath("totalElements").value(1))
-                .andExpect(jsonPath("pageable.pageSize").value(10))
-                .andExpect(jsonPath("pageable.pageNumber").value(0));
+                .andExpect(jsonPath("$.[0].loan").value(1))
+                .andExpect(jsonPath("$.[0].customer").value("Giovani"))
+                .andExpect(jsonPath("$.[0].returned").value(false))
+                .andExpect(jsonPath("$.[0].book.isbn").value("321"));
     }
 
 }

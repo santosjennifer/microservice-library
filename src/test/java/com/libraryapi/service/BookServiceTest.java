@@ -52,16 +52,16 @@ public class BookServiceTest {
         when(repository.existsByIsbn(Mockito.anyString())).thenReturn(false);
         when(repository.save(book)).thenReturn(
                 Book.builder().id(1L)
-                        .isbn("123")
-                        .author("Fulano")
-                        .title("As aventuras").build());
+                        .isbn("3344")
+                        .author("Suzanne Collins")
+                        .title("Jogos vorazes").build());
 
         Book savedBook = service.save(book);
 
         assertThat(savedBook.getId()).isNotNull();
-        assertThat(savedBook.getIsbn()).isEqualTo("123");
-        assertThat(savedBook.getTitle()).isEqualTo("As aventuras");
-        assertThat(savedBook.getAuthor()).isEqualTo("Fulano");
+        assertThat(savedBook.getIsbn()).isEqualTo("3344");
+        assertThat(savedBook.getTitle()).isEqualTo("Jogos vorazes");
+        assertThat(savedBook.getAuthor()).isEqualTo("Suzanne Collins");
     }
     
 	@Test
